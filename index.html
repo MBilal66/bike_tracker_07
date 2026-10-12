@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bike Tracker</title>
+<meta name="theme-color" content="#2456d6">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Bike Tracker">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<style>
+:root{--bg:#f4f3ef;--card:#fff;--tx:#1d1d1b;--mu:#6b6b66;--bd:#e3e1da;--ac:#2456d6;--ok:#1f8a4c;--wa:#c27803;--er:#c62828;--tr:#e9e7e0;--numfont:'Share Tech Mono',ui-monospace,monospace;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141413;--card:#1f1f1d;--tx:#efeee9;--mu:#a3a29b;--bd:#33332f;--ac:#5b86f0;--ok:#4cc27f;--wa:#f0b040;--er:#ff6b6b;--tr:#33332f}}
+:root[data-theme="dark"]{--bg:#141413;--card:#1f1f1d;--tx:#efeee9;--mu:#a3a29b;--bd:#33332f;--ac:#5b86f0;--ok:#4cc27f;--wa:#f0b040;--er:#ff6b6b;--tr:#33332f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:520px;margin:0 auto;padding:16px 14px 90px}
+h1{font-size:20px;margin:0 0 12px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+.sub{font-size:13px;color:var(--mu);margin-top:4px}
+input,select,textarea{width:100%;box-sizing:border-box;font:inherit;padding:11px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx)}
+button{font:inherit;border:0;border-radius:10px;padding:11px 14px;background:var(--ac);color:#fff;font-weight:600}
+button.g{background:var(--tr);color:var(--tx)}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.bar{height:8px;background:var(--tr);border-radius:8px;overflow:hidden;margin:8px 0}
+.bar i{display:block;height:100%}
+.st{text-align:right;font-weight:700;font-size:13px}
+label{display:block;font-size:13px;color:var(--mu);margin:10px 0 4px}
+.tabs{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs button{flex:1;background:none;color:var(--mu);border-radius:0;padding:14px}
+.tabs button.on{color:var(--ac)}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:9}
+.sheet{background:var(--card);width:100%;max-width:520px;border-radius:18px 18px 0 0;padding:16px;max-height:90%;overflow:auto;box-sizing:border-box}
+.big{font-size:28px;font-weight:700}
+.swatch{width:34px;height:34px;border-radius:50%;border:2px solid var(--bd);display:inline-block;cursor:pointer;margin:2px}
+.swatch.on{border-color:var(--tx);box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--tx)}
+.swatch.scheme{vertical-align:middle}
+.meter{background:#111;font-family:'Space Mono',ui-monospace,monospace;font-weight:700;letter-spacing:3px;border:1px solid #000;border-radius:6px;font-size:21px}
+.meter-blue{color:#3ea6ff;text-shadow:0 0 6px rgba(62,166,255,.85),0 0 14px rgba(62,166,255,.5)}
+.meter-blue::placeholder{color:#1c4a66;text-shadow:none}
+.meter-green{color:#4caf50;text-shadow:0 0 6px rgba(76,175,80,.85),0 0 14px rgba(76,175,80,.5)}
+.meter-green::placeholder{color:#264d27;text-shadow:none}
+.meter-gold{color:#ffd54f;text-shadow:0 0 6px rgba(255,213,79,.85),0 0 14px rgba(255,193,7,.5)}
+.meter-gold::placeholder{color:#6b5a20;text-shadow:none}
+.meter-white{color:#f5f5f5;text-shadow:0 0 6px rgba(255,255,255,.85),0 0 14px rgba(255,255,255,.4)}
+.meter-white::placeholder{color:#666;text-shadow:none}
+.meter-red{color:#ff5252;text-shadow:0 0 6px rgba(255,82,82,.85),0 0 14px rgba(255,82,82,.5)}
+.meter-red::placeholder{color:#5c1f1f;text-shadow:none}
+summary{cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.box{aspect-ratio:1;border:2px solid var(--bd);border-radius:12px;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:4px;text-align:center}
+.bicon{font-size:22px}
+.bname{font-size:10px;line-height:1.15;color:var(--tx);overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.wn{background:var(--card);border:1px solid var(--bd);border-left:4px solid;border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:14px}
+#toast{display:none;position:fixed;left:12px;right:12px;bottom:calc(64px + env(safe-area-inset-bottom,0px));background:var(--tx);color:var(--bg);border-radius:12px;padding:8px 8px 8px 14px;align-items:center;justify-content:space-between;gap:10px;z-index:8;font-size:14px}
+#toast button{padding:6px 12px;background:var(--bg);color:var(--tx)}
+.stat{text-align:center}
+.li{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-top:1px solid var(--bd);font-size:14px}
+.li button{padding:6px 10px;font-size:12px}
+</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Space+Mono:wght@400;700&display=swap"></head><body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<div class="wrap"><div id="hdrwrap"></div><div class="card" id="hdr"><div class="row" style="align-items:center"><b style="flex:0 0 auto">Odometer</b><input id="odo" class="meter meter-blue" type="number" inputmode="numeric" placeholder="current km"><button onclick="setOdo()" style="flex:0 0 auto">Update</button></div><div class="sub" id="oage"></div></div><div id="warn"></div><div id="app"></div></div><div id="toast"></div>
+<div class="tabs"><button data-t="s" onclick="go('s')">🔧 Service</button><button data-t="f" onclick="go('f')">⛽ Fuel</button><button data-t="t" onclick="go('t')">🛣️ Trip</button></div>
+<script>
+const KEY='bikeTracker.v1';
+const OILS={'Mineral':{km:1500,days:90},'Semi-synthetic':{km:2500,days:120},'Fully synthetic':{km:4000,days:180}};
+const DEF=[
+{id:'oil',name:'Engine oil',icon:'🛢️',km:1500,days:90,type:'Mineral'},
+{id:'tune',name:'Tuning / full service',icon:'🔧',km:3000,days:120},
+{id:'chain',name:'Chain lube',icon:'⛓️',km:500,days:30},
+{id:'chainadj',name:'Chain clean & adjust',icon:'⚙️',km:1500,days:90},
+{id:'brake',name:'Brake pads',icon:'🛑',km:10000,days:365},
+{id:'air',name:'Air filter',icon:'💨',km:6000,days:180},
+{id:'plug',name:'Spark plug',icon:'⚡',km:8000,days:365},
+{id:'tyre',name:'Tyres (check / replace)',icon:'🛞',km:20000,days:730}];
+let DB,S,tab='f';
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const today=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const dd=(a,b)=>Math.round((new Date(b)-new Date(a))/864e5);
+const add=(d,n)=>{const x=new Date(d);x.setUTCDate(x.getUTCDate()+n);return x.toISOString().slice(0,10)};
+const fmt=n=>Math.round(n).toLocaleString();
+function fresh(name){return{name:name||'My bike',odo:{km:0,date:null},items:DEF.map(x=>({...x,lastKm:null,lastDate:null,note:''})),fuel:[],reserve:[],trips:[],log:[],olog:[]}}
+function fixBike(b){b.reserve=b.reserve||[];b.trips=b.trips||[];b.log=b.log||[];b.olog=b.olog||(b.odo.date?[{km:b.odo.km,date:b.odo.date}]:[]);return b}
+function load(){
+  let raw=null;try{raw=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+  if(raw&&raw.bikes){DB=raw}
+  else if(raw&&raw.items){DB={activeId:'b1',order:['b1'],nextId:2,bikes:{b1:raw}}}
+  else{DB={activeId:'b1',order:['b1'],nextId:2,bikes:{b1:fresh('My bike')}}}
+  Object.values(DB.bikes).forEach(fixBike);
+  S=DB.bikes[DB.activeId];
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(DB))}catch(e){}}
+const THEMES=['#2456d6','#1f8a4c','#c2410c','#9333ea','#0d9488','#c62828','#475569'];
+const UNDO_MS=120000;
+function applyTheme(){
+  document.documentElement.style.setProperty('--ac',DB.theme||THEMES[0]);
+  if(DB.scheme==null&&DB.forceDark)DB.scheme='dark';
+  if(DB.scheme==='dark')document.documentElement.setAttribute('data-theme','dark');
+  else if(DB.scheme==='light')document.documentElement.setAttribute('data-theme','light');
+  else document.documentElement.removeAttribute('data-theme');
+}
+function setTheme(c){DB.theme=c;save();applyTheme();render()}
+function setScheme(v){DB.scheme=v;save();applyTheme();render()}
+function switchBike(id){if(DB.bikes[id]){DB.activeId=id;S=DB.bikes[id];save();render()}}
+function addBike(){const id='b'+(DB.nextId++);DB.bikes[id]=fresh('New bike');DB.order.push(id);DB.activeId=id;S=DB.bikes[id];save();render()}
+function askDelBike(id){
+  const m=document.createElement('div');m.className='modal';m.id='m';
+  m.innerHTML=`<div class="sheet"><b style="font-size:18px">Delete “${esc(DB.bikes[id].name||'this bike')}”?</b><div class="sub" style="margin-top:6px">This removes all its reminders, fuel log and trip history. This can't be undone.</div><div class="row" style="margin-top:14px"><button class="g" onclick="closeM()">Cancel</button><button style="background:var(--er)" onclick="delBike('${id}');closeM()">Delete</button></div></div>`;
+  document.body.appendChild(m);
+}
+function delBike(id){
+  if(DB.order.length<2)return;
+  delete DB.bikes[id];DB.order=DB.order.filter(x=>x!==id);
+  if(DB.activeId===id){DB.activeId=DB.order[0];S=DB.bikes[DB.activeId]}
+  save();render();
+}
+function header(){
+  const opts=DB.order.map(id=>`<option value="${id}" ${id===DB.activeId?'selected':''}>${esc(DB.bikes[id].name||'Bike')}</option>`).join('');
+  return `<div class="card"><div class="row" style="align-items:center;gap:8px"><input id="bname" placeholder="Bike name" maxlength="40" style="flex:2;border:0;background:transparent;font-size:17px;font-weight:700;padding:4px" oninput="S.name=this.value;save()" value="${esc(S.name||'')}"><select id="bikesel" style="flex:0 0 auto;width:auto" onchange="switchBike(this.value)">${opts}</select><button class="g" style="flex:0 0 auto" onclick="addBike()">+ Bike</button></div></div>`;
+}
+function go(t){tab=t;render()}
+function render(){
+  if(!$('bname')||(document.activeElement!==$('bname')&&document.activeElement!==$('bikesel')))$('hdrwrap').innerHTML=header();
+  $('app').innerHTML=tab==='s'?svc():tab==='f'?fuel():trip();
+  if(document.activeElement!==$('odo'))$('odo').value=est()||'';
+  const ag=S.odo.date?dd(S.odo.date,today()):null,rt=rate();
+  $('oage').textContent=ag==null?'Enter your current km to start.':(ag>0&&rt)?'Estimated from your usual riding (~'+Math.round(rt)+' km/day). Enter your real reading whenever you like to correct it.':ag===0?'Updated today.':'Updated '+ag+' day(s) ago.';
+  const w=S.items.filter(isOn).map(it=>({it,i:info(it)})).filter(x=>x.i.s==='over'||x.i.s==='soon');
+  $('warn').innerHTML=w.slice(0,4).map(({it,i})=>`<div class="wn" style="border-left-color:${i.s==='over'?'var(--er)':'var(--wa)'}" onclick="go('s')">${i.s==='over'?'🔴':'🟠'} <b>${esc(it.name)}</b> ${when(i)}</div>`).join('');
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+}
+const CORE=['oil','tune','chain'];
+const isOn=it=>it.on!==undefined?it.on:(CORE.includes(it.id)||it.lastKm!=null);
+function setO(km){const d=today();S.odo={km,date:d};S.olog=(S.olog||[]).filter(x=>x.date!==d);S.olog.push({km,date:d});S.olog=S.olog.slice(-40)}
+function rate(){const L=S.olog||[];if(L.length<2)return 0;const a=L[Math.max(0,L.length-8)],b=L[L.length-1],d=dd(a.date,b.date);return d>=3&&b.km>a.km?(b.km-a.km)/d:0}
+function est(){const d=S.odo.date?Math.min(45,Math.max(0,dd(S.odo.date,today()))):0;return S.odo.km+Math.round(rate()*d)}
+function info(it){
+  const hk=it.km>0&&it.lastKm!=null,hd=it.days>0&&!!it.lastDate;
+  if(!hk&&!hd)return{p:-1,s:'none'};
+  const E=est();let p=0,remKm=null,remD=null;
+  if(hk){remKm=it.lastKm+it.km-E;p=(E-it.lastKm)/it.km}
+  if(hd){remD=dd(today(),add(it.lastDate,it.days));p=Math.max(p,dd(it.lastDate,today())/it.days)}
+  const wk=it.wk!=null?it.wk:Math.max(100,.15*it.km),wd=it.wd!=null?it.wd:7;
+  const s=((remKm!=null&&remKm<0)||(remD!=null&&remD<0))?'over':((remKm!=null&&remKm<=wk)||(remD!=null&&remD<=wd))?'soon':'ok';
+  return{p,remKm,remD,s};
+}
+const PRE={
+ 'Small commuter (70–125cc)':{oil:[1500,90],tune:[3000,120],chain:[500,30],chainadj:[1500,90],brake:[10000,365],air:[6000,180],plug:[8000,365],tyre:[20000,730],t:'Mineral'},
+ 'Mid-size (150–250cc)':{oil:[2500,120],tune:[5000,180],chain:[500,30],chainadj:[1500,90],brake:[12000,365],air:[8000,180],plug:[10000,365],tyre:[20000,730],t:'Semi-synthetic'},
+ 'Large (300cc and up)':{oil:[4000,180],tune:[8000,240],chain:[500,30],chainadj:[1000,60],brake:[15000,365],air:[10000,365],plug:[12000,365],tyre:[20000,730],t:'Fully synthetic'}};
+const bikeSel=()=>`<label>Bike type (loads typical intervals)</label><select onchange="preset(this.value)"><option value="">Choose…</option>${Object.keys(PRE).map(k=>`<option ${S.cls===k?'selected':''}>${k}</option>`).join('')}</select>`;
+function preset(k){
+  const P=PRE[k];if(!P)return;
+  S.items.forEach(it=>{if(P[it.id]){it.km=P[it.id][0];it.days=P[it.id][1]}});
+  const o=S.items.find(x=>x.id==='oil');if(o)o.type=P.t;
+  S.cls=k;save();render();
+}
+function addRem(id){S.items.find(x=>x.id===id).on=true;save();render()}
+function remRem(id){S.items.find(x=>x.id===id).on=false;closeM();save();render()}
+function startToday(){
+  if(!est()){$('oage').textContent='Enter your current km first, then tap Update.';return}
+  S.items.filter(isOn).forEach(it=>{if(it.lastKm==null){it.on=true;it.lastKm=est();it.lastDate=today()}});
+  save();render();
+}
+let tt=null,okOpen=false,setOpen=false;
+const snap=it=>({lastKm:it.lastKm,lastDate:it.lastDate,note:it.note,on:it.on,km:it.km,days:it.days,type:it.type});
+const canUndo=it=>it.undo&&Date.now()-it.undo.t<UNDO_MS;
+const dbtn=(it,full)=>canUndo(it)?`<button class="g" style="${full?'width:100%;margin-top:10px;':''}border:1px solid var(--wa)" onclick="undoDone('${it.id}')">↩ Undo</button>`:full?`<button style="width:100%;margin-top:10px" onclick="doneNow('${it.id}')">✓ Done</button>`:`<button class="g" onclick="doneNow('${it.id}')">Done</button>`;
+function toast(m,id){const t=$('toast');t.innerHTML='<span>'+esc(m)+'</span>'+(id?`<button onclick="undoDone('${id}')">Undo</button>`:'');t.style.display='flex';clearTimeout(tt);tt=setTimeout(()=>{t.style.display='none'},7000)}
+function undoDone(id){
+  const it=S.items.find(x=>x.id===id);
+  if(it&&it.undo){
+    if(it.undo.logAt)S.log=S.log.filter(l=>l.at!==it.undo.logAt);
+    Object.assign(it,it.undo.prev);delete it.undo;save();$('toast').style.display='none';render();
+  }
+}
+function mark(it,extra,price){
+  const at=Date.now();
+  it.undo={prev:snap(it),t:at,logAt:at};
+  Object.assign(it,extra,{on:true,lastKm:est(),lastDate:today()});
+  S.log.push({at,id:it.id,name:it.name,date:today(),km:est(),price:price||0});
+  okOpen=true;save();
+}
+function doneNow(id){
+  const it=S.items.find(x=>x.id===id);
+  costSheet(id,id==='oil'?null:'');
+}
+function costSheet(id,oilPreset){
+  const it=S.items.find(x=>x.id===id);
+  const m=document.createElement('div');m.className='modal';m.id='m';
+  m.innerHTML=`<div class="sheet"><b style="font-size:18px">${it.icon} ${esc(it.name)}</b>
+  ${id==='oil'?`<label>Oil used</label><select id="cso">${Object.keys(OILS).map(k=>`<option>${k}</option>`).join('')}</select>`:''}
+  <label>Cost (optional, leave empty if none)</label><input id="csc" type="number" inputmode="decimal" placeholder="e.g. 800">
+  <div class="row" style="margin-top:14px"><button class="g" onclick="closeM()">Cancel</button><button onclick="confirmDone('${id}')">✓ Done</button></div></div>`;
+  document.body.appendChild(m);
+}
+function confirmDone(id){
+  const it=S.items.find(x=>x.id===id),price=+($('csc')?$('csc').value:0)||0;
+  if(id==='oil'){const t=$('cso').value;mark(it,{type:t,km:OILS[t].km,days:OILS[t].days,note:t},price)}
+  else mark(it,{},price);
+  closeM();toast(it.name+' done. You can undo it for 2 minutes.',id);render();
+}
+function dueDay(it,i){
+  const r=rate(),c=[];
+  if(r>0&&i.remKm!=null)c.push(add(today(),Math.max(0,Math.round(i.remKm/r))));
+  if(i.remD!=null)c.push(add(today(),Math.max(0,i.remD)));
+  return c.sort()[0]||null;
+}
+function cal(it,i){
+  const d=dueDay(it,i);if(!d)return '';
+  let a=add(d,-3);if(a<=today())a=add(today(),1);
+  const f=x=>x.replace(/-/g,''),t=encodeURIComponent('🏍️ Bike: '+it.name+' is due soon');
+  return `<a href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=${t}&dates=${f(a)}/${f(add(a,1))}&details=${encodeURIComponent('Open Bike Tracker and tap Done when finished: '+LINK)}" target="_blank" rel="noopener" style="font-size:13px;color:var(--ac)">🔔 Add phone reminder</a>`;
+}
+const when=i=>i.s==='over'?'is overdue':'due in '+[i.remKm!=null?fmt(Math.max(i.remKm,0))+' km':null,i.remD!=null?Math.max(i.remD,0)+' days':null].filter(Boolean).join(' or ');
+function card(it,i){
+  let col='var(--ok)',st='OK',line='';
+  if(i.s==='none'){col='var(--mu)';st='Not set';line='Tap Done if you just did this. For an older date, use Settings.'}
+  else{
+    if(i.s==='over'){col='var(--er)';st='Overdue'}else if(i.s==='soon'){col='var(--wa)';st='Due soon'}
+    line=left(i)+(i.remKm!=null?'<br>Next at '+fmt(it.lastKm+it.km)+' km':'<br>Due on '+add(it.lastDate,it.days));
+  }
+  return `<div class="card"><div class="row" style="align-items:center"><b>${it.icon} ${esc(it.name)}</b><span class="st" style="color:${col}">${st}</span></div><div class="bar"><i style="width:${Math.min(Math.max(i.p,0),1)*100}%;background:${col}"></i></div><div class="sub">${line}</div>${it.note?`<div class="sub">Last used: ${esc(it.note)}</div>`:''}${dbtn(it,1)}${i.s!=='none'?'<div style="margin-top:8px">'+cal(it,i)+'</div>':''}</div>`;
+}
+function box(it,i){
+  const col=i.s==='over'?'var(--er)':i.s==='soon'?'var(--wa)':'var(--mu)';
+  return `<div class="box" style="border-color:${col}" onclick="openInfo('${it.id}')"><div class="bicon">${it.icon}</div><div class="bname">${esc(it.name)}</div></div>`;
+}
+function openInfo(id){
+  const it=S.items.find(x=>x.id===id),i=info(it);
+  let col='var(--ok)',st='OK',line='';
+  if(i.s==='none'){col='var(--mu)';st='Not set';line='Tap Done if you just did this. For an older date, use Settings.'}
+  else{
+    if(i.s==='over'){col='var(--er)';st='Overdue'}else if(i.s==='soon'){col='var(--wa)';st='Due soon'}
+    line=left(i)+(i.remKm!=null?'<br>Next at '+fmt(it.lastKm+it.km)+' km':it.lastDate?'<br>Due on '+add(it.lastDate,it.days):'');
+  }
+  const m=document.createElement('div');m.className='modal';m.id='m';
+  const bd=canUndo(it)?`<button class="g" style="width:100%;margin-top:10px;border:1px solid var(--wa)" onclick="undoDone('${it.id}');closeM()">↩ Undo</button>`:`<button style="width:100%;margin-top:10px" onclick="closeM();costSheet('${it.id}')">✓ Done</button>`;
+  m.innerHTML=`<div class="sheet"><div class="row" style="align-items:center"><b style="font-size:18px">${it.icon} ${esc(it.name)}</b><span class="st" style="color:${col}">${st}</span></div><div class="sub" style="margin-top:8px">${line}</div>${it.note?`<div class="sub">Last used: ${esc(it.note)}</div>`:''}${bd}${i.s!=='none'?'<div style="margin-top:10px">'+cal(it,i)+'</div>':''}<button class="g" style="width:100%;margin-top:14px" onclick="closeM()">Close</button></div>`;
+  document.body.appendChild(m);
+}
+function svc(){
+  const its=S.items.filter(isOn).map(it=>({it,i:info(it)})).sort((a,b)=>b.i.p-a.i.p);
+  const setup=!S.items.some(x=>x.lastKm!=null);
+  const noOdo=!S.odo.date;
+  const need=its.filter(x=>x.i.s!=='ok'),ok=its.filter(x=>x.i.s==='ok');
+  let h='';
+  if(noOdo)h+=`<div class="card"><b>👋 “${esc(S.name||'This bike')}” isn't set up yet</b><div class="sub">Enter your current km above and tap Update to get started.</div></div>`;
+  else if(!need.length)h+=`<div class="card"><b style="color:var(--ok)">✓ All good</b><div class="sub">Nothing needs attention. You'll see a warning here before anything is due.</div></div>`;
+  if(need.length)h+=`<div class="grid">${need.map(({it,i})=>box(it,i)).join('')}</div>`;
+  if(ok.length){
+    h+=`<details class="card" ${okOpen?'open':''} ontoggle="okOpen=this.open"><summary><b>On track (${ok.length})</b></summary>`;
+    for(const {it,i} of ok)h+=`<div class="li"><div>${it.icon} ${esc(it.name)}<div class="sub">${left(i)}${canUndo(it)?'<br>✓ Marked done. Undo is available for 2 minutes.':''}<br>${cal(it,i)}</div></div>${dbtn(it)}</div>`;
+    h+=`</details>`;
+  }
+  const off=S.items.filter(x=>!isOn(x)),f=x=>x.replace(/-/g,''),a=add(today(),1);
+  const wk=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent('🏍️ Bike check: update km')}&details=${encodeURIComponent('Open Bike Tracker, update your km and tap Done on finished jobs: '+LINK)}&dates=${f(a)}/${f(add(a,1))}&recur=${encodeURIComponent('RRULE:FREQ=WEEKLY')}`;
+  h+=`<details class="card" ${setOpen?'open':''} ontoggle="setOpen=this.open"><summary><b>⚙️ Settings</b></summary>
+  <label>📌 Quick-open shortcuts</label><div class="sub">Add these as separate Home Screen icons (share/bookmark each link) to jump straight to a tab, skipping the home screen:</div>
+  <div class="li"><div>⛽ Straight to Refuel</div><a style="padding:6px 12px;border-radius:8px;text-decoration:none;color:var(--tx);background:var(--tr)" href="${LINK}#refuel">Copy link</a></div>
+  <div class="li"><div>🛣️ Straight to Trip</div><a style="padding:6px 12px;border-radius:8px;text-decoration:none;color:var(--tx);background:var(--tr)" href="${LINK}#trip">Copy link</a></div>
+  <label style="margin-top:14px">🏍️ Your bikes</label>`;
+  for(const id of DB.order)h+=`<div class="li"><div>${id===DB.activeId?'▶ ':''}${esc(DB.bikes[id].name||'Bike')}</div><div style="display:flex;gap:6px">${id!==DB.activeId?`<button class="g" onclick="switchBike('${id}')">Switch</button>`:''}${DB.order.length>1?`<button class="g" onclick="askDelBike('${id}')">Delete</button>`:''}</div></div>`;
+  h+=`<button class="g" style="width:100%;margin-top:8px" onclick="addBike()">+ Add another bike</button>`;
+  if(setup)h+=`<label style="margin-top:16px">👋 Quick setup for “${esc(S.name||'this bike')}”</label>${bikeSel()}<button style="width:100%;margin-top:10px" onclick="startToday()">Start tracking from today</button><div class="sub">Not serviced recently? Use Edit below, once started, to enter the real last date.</div>`;
+  h+=`<label style="margin-top:16px">Your reminders. Edit changes settings, Remove moves it back to “Add a reminder”</label>`;
+  for(const it of S.items.filter(isOn))h+=`<div class="li"><div>${it.icon} ${esc(it.name)}<div class="sub">every ${[it.km?fmt(it.km)+' km':'',it.days?it.days+' days':''].filter(Boolean).join(' / ')}</div></div><div style="display:flex;gap:6px"><button class="g" onclick="openDone('${it.id}')">Edit</button><button class="g" onclick="remRem('${it.id}')">Remove</button></div></div>`;
+  h+=(setup?'':`<label>Bike type preset</label>`+bikeSel());
+  h+='<label>Add a reminder</label>';
+  for(const it of off)h+=`<div class="li"><div>${it.icon} ${esc(it.name)}</div><div style="display:flex;gap:6px"><button onclick="addRem('${it.id}')">Add</button>${it.custom?`<button class="g" onclick="delRem('${it.id}')">Delete</button>`:''}</div></div>`;
+  h+=`<button class="g" style="width:100%;margin-top:10px" onclick="openNew()">＋ Create your own reminder</button>`;
+  h+=`<label>📱 Use it like an app</label><div class="sub">Add this page to your Home Screen: in Chrome tap ⋮ then “Add to Home screen”. On iPhone tap Share then “Add to Home Screen”. To get pinged without opening it, add a weekly reminder to your calendar:</div><a href="${wk}" target="_blank" rel="noopener" style="display:block;margin-top:8px;color:var(--ac)">🔔 Add weekly bike-check reminder</a>`;
+  h+=`<label>📊 Expense report</label><div class="sub">Excel workbook: one sheet per month (fuel + service costs), a Summary sheet, keeps only the latest 5 months.</div><button class="g" style="width:100%;margin-top:8px" onclick="exportReport()">Export Excel report</button><div class="sub" id="em"></div>
+  <label>Backup (your data lives in this phone's browser)</label><textarea id="bt" rows="3" placeholder="Backup text appears here. To restore, paste it here."></textarea><div class="row" style="margin-top:8px"><button class="g" onclick="bk()">Show / copy backup</button><button class="g" onclick="rs()">Restore</button></div><div class="sub" id="bm"></div>
+  <label style="margin-top:16px">🎨 App theme color</label><div>${THEMES.map(c=>`<span class="swatch ${((DB.theme||THEMES[0])===c)?'on':''}" style="background:${c}" onclick="setTheme('${c}')"></span>`).join(' ')}</div>
+  <label style="margin-top:14px">🌗 App color (light / dark)</label><div class="sub">Pick white or black, or leave on Auto to follow your phone.</div><div style="margin-top:4px">
+  <span class="swatch scheme ${(!DB.scheme||DB.scheme==='auto')?'on':''}" style="background:linear-gradient(135deg,#fff 50%,#111 50%)" onclick="setScheme('auto')" title="Auto"></span>
+  <span class="swatch scheme ${DB.scheme==='light'?'on':''}" style="background:#fff" onclick="setScheme('light')" title="White"></span>
+  <span class="swatch scheme ${DB.scheme==='dark'?'on':''}" style="background:#111" onclick="setScheme('dark')" title="Black"></span>
+  </div></details>`;
+  return h;
+}
+const LINK='https://claude.ai/artifact/3PyUU571xoRYQATxcw7MSq';
+function openNew(){
+  const m=document.createElement('div');m.className='modal';m.id='m';
+  m.innerHTML=`<div class="sheet"><b style="font-size:18px">＋ New reminder</b>
+  <label>Name</label><input id="nn" placeholder="e.g. Insurance renewal, Battery check">
+  <label>Icon</label><select id="ni">${['🔧','🔩','🧴','🔋','💡','🧽','📄','🛞','⛽','🪖'].map(e=>`<option>${e}</option>`).join('')}</select>
+  <label>Repeat every (km). Leave empty if only by time</label><input id="ik" class="meter meter-green" type="number" inputmode="numeric" placeholder="e.g. 3000">
+  <label>Repeat every (days). Leave empty if only by km</label><input id="iy" type="number" inputmode="numeric" placeholder="e.g. 365">
+  <label>Warn me when this many km are left</label><input id="wk" class="meter meter-red" type="number" inputmode="numeric" placeholder="default: 15% of the interval">
+  <label>Warn me when this many days are left</label><input id="wd" type="number" inputmode="numeric" placeholder="default: 7">
+  <label>Last done at (km). Empty means starting now</label><input id="dk" class="meter meter-blue" type="number" inputmode="numeric">
+  <label>Last done on (date). Empty means today</label><input id="dt" type="date">
+  <div class="sub" id="nmsg" style="color:var(--er)"></div>
+  <div class="row" style="margin-top:14px"><button class="g" onclick="closeM()">Cancel</button><button onclick="addCustom()">Add reminder</button></div></div>`;
+  document.body.appendChild(m);
+}
+function addCustom(){
+  const name=$('nn').value.trim(),km=+$('ik').value||0,days=+$('iy').value||0,n=v=>v===''?null:+v,msg=t=>{$('nmsg').textContent=t};
+  if(!name){msg('Give it a name.');return}
+  if(!km&&!days){msg('Enter how often: km, days, or both.');return}
+  S.items.push({id:'c'+Date.now(),name,icon:$('ni').value,km,days,wk:n($('wk').value),wd:n($('wd').value),lastKm:$('dk').value===''?est():+$('dk').value,lastDate:$('dt').value||today(),note:'',on:true,custom:true});
+  save();closeM();render();
+}
+function delRem(id){S.items=S.items.filter(x=>x.id!==id);save();render()}
+const left=i=>{const p=[];if(i.remKm!=null)p.push(i.remKm>=0?fmt(i.remKm)+' km left':'over by '+fmt(-i.remKm)+' km');if(i.remD!=null)p.push(i.remD>=0?i.remD+' days left':'over by '+(-i.remD)+' days');return p.join(' · ')};
+function setOdo(){
+  const s=$('odo').value;if(s===''||!(+s>=0))return;
+  const km=Math.round(+s*10)/10;
+  if(S.odo.date){
+    const prev=S.odo.km;
+    if(km<prev)return askOdoConfirm(km,'This reading ('+fmt(km)+' km) is lower than your last one ('+fmt(prev)+' km). Odometers don\'t usually go down — check for a typo.');
+    const days=Math.max(1,dd(S.odo.date,today())),jump=km-prev,r=rate(),typical=r>0?r*days:null;
+    if(jump>1000&&(typical==null||jump>typical*4+200))return askOdoConfirm(km,'That\'s a jump of '+fmt(jump)+' km since your last reading ('+fmt(prev)+' km, '+days+' day(s) ago). Double-check the number before saving.');
+  }
+  setO(km);save();render();
+}
+function askOdoConfirm(km,msg){
+  const m=document.createElement('div');m.className='modal';m.id='m';
+  m.innerHTML=`<div class="sheet"><b style="font-size:18px">⚠️ Check this reading</b><div class="sub" style="margin-top:6px">${esc(msg)}</div><div class="row" style="margin-top:14px"><button class="g" onclick="closeM()">Let me fix it</button><button onclick="setO(${km});save();closeM();render()">Save anyway</button></div></div>`;
+  document.body.appendChild(m);
+}
+function openDone(id){
+  const it=S.items.find(x=>x.id===id),oil=id==='oil',wk=it.wk!=null?it.wk:Math.max(100,Math.round(.15*it.km)),wd=it.wd!=null?it.wd:7;
+  const m=document.createElement('div');m.className='modal';m.id='m';
+  m.innerHTML=`<div class="sheet"><b style="font-size:18px">${it.icon} ${esc(it.name)}</b>${it.custom?`<label>Name</label><input id="nn" value="${esc(it.name)}">`:''}
+  ${oil?`<label>Oil type</label><select id="ot" onchange="oilPick()">${Object.keys(OILS).map(k=>`<option ${it.type===k?'selected':''}>${k}</option>`).join('')}</select>`:''}
+  <label>Service every (km)</label><input id="ik" class="meter meter-green" type="number" inputmode="numeric" value="${it.km||''}">
+  <label>Or every (days), whichever comes first</label><input id="iy" type="number" inputmode="numeric" value="${it.days||''}">
+  <label>Warn me when this many km are left</label><input id="wk" class="meter meter-red" type="number" inputmode="numeric" value="${wk}">
+  <label>Warn me when this many days are left</label><input id="wd" type="number" inputmode="numeric" value="${wd}">
+  <label>Last done at (km)</label><input id="dk" class="meter meter-blue" type="number" inputmode="numeric" value="${it.lastKm==null?'':it.lastKm}">
+  <label>Last done on (date)</label><input id="dt" type="date" value="${it.lastDate||''}">
+  <div class="row" style="margin-top:14px"><button class="g" onclick="closeM()">Cancel</button><button onclick="doneSave('${id}')">Save</button></div><div class="sub" style="text-align:center;margin-top:12px"><a href="#" onclick="remRem('${id}');return false" style="color:var(--er)">Remove this reminder</a></div></div>`;
+  document.body.appendChild(m);
+}
+function oilPick(){const o=OILS[$('ot').value];$('ik').value=o.km;$('iy').value=o.days}
+function closeM(){const m=$('m');if(m)m.remove()}
+function doneSave(id){
+  const it=S.items.find(x=>x.id===id),k=$('dk').value,n=v=>v===''?null:+v;
+  const nk=+$('ik').value||0,nd=+$('iy').value||0;if(nk||nd){it.km=nk;it.days=nd}it.on=true;if(it.custom&&$('nn')&&$('nn').value.trim())it.name=$('nn').value.trim();it.wk=n($('wk').value);it.wd=n($('wd').value);
+  if(k!==''&&+k>=0){it.lastKm=+k;it.lastDate=$('dt').value||today();if(+k>est())setO(+k)}
+  if(id==='oil'){it.type=$('ot').value;it.note=it.type}
+  save();closeM();render();
+}
+function calc(){
+  const f=[...S.fuel].sort((a,b)=>a.km-b.km);
+  const rows=f.map((e,i)=>({...e,dist:i?e.km-f[i-1].km:null,eff:i?(e.km-f[i-1].km)/e.l:null}));
+  const r=rows.filter(x=>x.eff);let avg=null,cpk=null;
+  if(r.length){
+    avg=r.reduce((s,x)=>s+x.dist,0)/r.reduce((s,x)=>s+x.l,0);
+    const pr=r.filter(x=>x.price>0);
+    if(pr.length)cpk=pr.reduce((s,x)=>s+x.price,0)/pr.reduce((s,x)=>s+x.dist,0);
+  }
+  return{rows,avg,cpk,last:r.length?r[r.length-1].eff:null,lastAt:r.length?r[r.length-1].km:null,n:r.length};
+}
+const resPts=()=>[...S.reserve,...S.fuel.filter(e=>e.rk!=null).map(e=>e.rk)].sort((a,b)=>a-b);
+function pendingReserveKm(){
+  if(!S.reserve.length)return null;
+  const rk=S.reserve[S.reserve.length-1];
+  const lastFuel=S.fuel.length?Math.max(...S.fuel.map(e=>e.km)):-1;
+  return rk>lastFuel?rk:null;
+}
+function markReserve(){
+  const msg=t=>{$('rm').textContent=t};
+  const km=+$('rk').value;
+  if(!(km>0))return msg('Enter the odometer reading.');
+  const lastFuel=S.fuel.length?Math.max(...S.fuel.map(e=>e.km)):-1;
+  if(km<=lastFuel)return msg('That reading is before your last refuel ('+fmt(lastFuel)+' km).');
+  if(S.reserve.length&&km<=S.reserve[S.reserve.length-1])return msg('That reading is before your last reserve mark.');
+  S.reserve.push(km);S.reserve.sort((a,b)=>a-b);S.resDate=S.resDate||{};S.resDate[km]=today();
+  setO(km);
+  save();render();toast('Marked on reserve at '+fmt(km)+' km.');
+}
+function clearReserve(){const k=S.reserve.pop();if(S.resDate)delete S.resDate[k];save();render()}
+function delReserve(km){const i=S.reserve.indexOf(km);if(i>=0){S.reserve.splice(i,1);if(S.resDate)delete S.resDate[km];save();render()}}
+function monthFuel(){
+  const d=new Date(),y=d.getFullYear(),m=d.getMonth(),pre=today().slice(0,7),last=new Date(y,m+1,0).getDate();
+  const mon=d.toLocaleString('en',{month:'short'});
+  const l=S.fuel.filter(e=>(e.date||'').slice(0,7)===pre).reduce((a,e)=>a+e.l,0);
+  return{l,label:'1 '+mon+' – '+last+' '+mon};
+}
+function dateAt(km){const f=S.fuel.find(e=>e.km===km);if(f)return f.date;return (S.resDate&&S.resDate[km])||''}
+function fuelChart(rows){
+  const r=rows.slice(-20);if(!r.length)return '';
+  const W=320,H=150,L=30,R=12,T=16,B=22,v=r.map(x=>x.eff);
+  let lo=Math.min(...v),hi=Math.max(...v);if(hi-lo<1){lo-=.5;hi+=.5}
+  const pad=(hi-lo)*.15;lo-=pad;hi+=pad;
+  const X=i=>r.length>1?L+i*(W-L-R)/(r.length-1):(L+W-R)/2,Y=y=>T+(hi-y)*(H-T-B)/(hi-lo);
+  let g='';
+  for(let k=0;k<3;k++){const y=lo+(hi-lo)*k/2;g+=`<line x1="${L}" x2="${W-R}" y1="${Y(y)}" y2="${Y(y)}" stroke="var(--bd)" stroke-width="1"/><text x="${L-4}" y="${Y(y)+3}" text-anchor="end" font-size="9" fill="var(--mu)">${y.toFixed(1)}</text>`}
+  if(r.length>1)g+=`<polyline fill="none" stroke="var(--ac)" stroke-width="2" points="${r.map((x,i)=>X(i)+','+Y(x.eff)).join(' ')}"/>`;
+  r.forEach((x,i)=>{g+=`<circle cx="${X(i)}" cy="${Y(x.eff)}" r="3.5" fill="var(--ac)"/>`;if(r.length<=8)g+=`<text x="${X(i)}" y="${Y(x.eff)-7}" text-anchor="middle" font-size="9" fill="var(--tx)">${x.eff.toFixed(1)}</text>`});
+  g+=`<text x="${L}" y="${H-6}" font-size="9" fill="var(--mu)">${esc(fmt(r[0].at))} km</text><text x="${W-R}" y="${H-6}" text-anchor="end" font-size="9" fill="var(--mu)">${esc(fmt(r[r.length-1].at))} km</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Fuel average chart">${g}</svg>`;
+}
+function rcalc(){
+  const r=resPts(),rows=[];
+  for(let i=1;i<r.length;i++){
+    const a=r[i-1],b=r[i],fl=S.fuel.filter(e=>e.km>=a&&e.km<b),l=fl.reduce((s,e)=>s+e.l,0);
+    if(l>0)rows.push({dist:b-a,l,eff:(b-a)/l,at:b,date:dateAt(b),price:fl.reduce((s,e)=>s+(e.price||0),0)});
+  }
+  let avg=null,cpk=null;
+  if(rows.length){
+    avg=rows.reduce((s,x)=>s+x.dist,0)/rows.reduce((s,x)=>s+x.l,0);
+    const pr=rows.filter(x=>x.price>0);
+    if(pr.length)cpk=pr.reduce((s,x)=>s+x.price,0)/pr.reduce((s,x)=>s+x.dist,0);
+  }
+  return{rows,avg,cpk,last:rows.length?rows[rows.length-1].eff:null,lastAt:rows.length?rows[rows.length-1].at:null,n:rows.length};
+}
+function fuel(){
+  const useR=resPts().length>0,f=calc(),c=useR?rcalc():f;
+  const pend=pendingReserveKm();
+  let h=`<div class="card"><b>🟡 Reserve</b>
+  ${pend!=null
+    ?`<div class="sub">On reserve since <b>${fmt(pend)} km</b>. When you fill up, just enter the litres below.</div><button class="g" style="width:100%;margin-top:10px" onclick="clearReserve()">↩ Undo reserve mark</button>`
+    :`<div class="sub">Hit reserve but not refueling right now? Save the reading here. When you do fill up, just enter the litres below.</div><input id="rk" class="meter meter-gold" type="number" inputmode="numeric" placeholder="Odometer now (km)" value="${est()||''}"><button class="g" style="width:100%;margin-top:10px" onclick="markReserve()">⚠️ Mark as on reserve</button><div class="sub" id="rm" style="color:var(--er)"></div>`}
+  </div>
+  <div class="card"><b>⛽ Refuel</b>
+  <label>Litres added</label><input id="fl" class="meter meter-gold" type="number" inputmode="decimal" step="0.01" placeholder="e.g. 5.5">
+  ${pend!=null?`<div class="sub" style="margin-top:14px">🟡 This fill-up will be recorded as coming off reserve (marked at ${fmt(pend)} km).</div>`:''}
+  <details style="margin-top:8px"><summary class="sub">Add price (optional)</summary><input id="fp" type="number" inputmode="decimal" placeholder="Total paid" style="margin-top:6px"></details>
+  <button style="width:100%;margin-top:12px" onclick="addFuel()">Save</button><div class="sub" id="fm" style="color:var(--er)"></div></div>`;
+  h+=mapCard();
+  const ar=(useR?c.rows:c.rows.filter(x=>x.eff).map(x=>({...x,at:x.km})));
+  if(ar.length){
+    const nw=ar[ar.length-1],od=ar.length>1?ar[ar.length-2]:null,df=od?nw.eff-od.eff:null;
+    const col=x=>`<div class="stat"><div class="sub">${x.t}</div><div class="big">${x.v}</div><div class="sub">${x.u}</div>${x.d||''}</div>`;
+    h+=`<div class="card row">${col({t:'New avg',v:nw.eff.toFixed(2),u:'km/L at '+fmt(nw.at)+' km',d:df==null?'':`<div class="sub" style="color:${df>=0?'var(--ok)':'var(--er)'};font-weight:700">${df>=0?'▲ +':'▼ '}${df.toFixed(2)}</div>`})}${col(od?{t:'Previous avg',v:od.eff.toFixed(2),u:'km/L at '+fmt(od.at)+' km'}:{t:'Previous avg',v:'—',u:'not enough data yet'})}</div>
+    <div class="sub" style="margin:-4px 4px 12px">${useR?'Avg = km ridden between two reserve readings ÷ litres filled in that stretch.':'Avg = km since your previous refuel ÷ litres added in this refuel.'}</div>`;
+  }else if(S.fuel.length){h+=`<div class="card sub">Saved. ${useR?'After your next “on reserve” refuel':'After your next refuel'} your km/L will appear here.</div>`}
+  {
+   if(ar.length){
+    h+=`<div class="card"><b>📈 Fuel average (km/L)</b><div class="sub">Each point is one ${useR?'reserve-to-reserve stretch':'refuel'}.</div><div style="margin-top:8px">${fuelChart(ar)}</div>
+    <details style="margin-top:8px"><summary class="sub">Record of last 20 averages</summary>`;
+    for(const x of [...ar].reverse().slice(0,20))h+=`<div class="li"><div><b>${x.eff.toFixed(2)} km/L</b><div class="sub">${x.dist} km · ${+x.l.toFixed(2)} L · at ${fmt(x.at)} km${x.date?' · '+esc(x.date):''}</div></div></div>`;
+    h+=`</details></div>`;
+   }}
+  if(S.fuel.length){const mf=monthFuel();h+=`<div class="card" style="padding:10px 14px;display:flex;justify-content:space-between;align-items:center"><div class="sub" style="margin:0">⛽ Filled this month<br>(${mf.label})</div><div style="font-size:20px;font-weight:700">${+mf.l.toFixed(2)} L</div></div>`}
+  if(f.rows.length||S.reserve.length){
+    const ev=[...f.rows.map(e=>({t:'f',km:e.km,e})),...S.reserve.map(km=>({t:'r',km}))].sort((a,b)=>b.km-a.km||(a.t==='r'?-1:1));
+    h+=`<details class="card"><summary><b>History</b></summary>`;
+    for(const x of ev.slice(0,20)){
+      if(x.t==='r')h+=`<div class="li"><div>🟡 On reserve at ${fmt(x.km)} km<div class="sub">${esc((S.resDate&&S.resDate[x.km])||'')}</div></div><button class="g" onclick="delReserve(${x.km})">Delete</button></div>`;
+      else{const e=x.e;h+=`<div class="li"><div>${fmt(e.km)} km · ${e.l} L${e.rk!=null?' ⚠️':''}<div class="sub">${e.eff&&!useR?e.dist+' km · '+e.eff.toFixed(1)+' km/L · ':''}${esc(e.date)}</div></div><button class="g" onclick="delFuel(${e.km})">Delete</button></div>`}
+    }
+    h+=`</details>`;
+  }
+  return h;
+}
+function addFuel(){
+  const km=est(),l=+$('fl').value,p=+$('fp').value||0,msg=t=>{$('fm').textContent=t};
+  if(!(l>0))return msg('Enter the litres.');
+  if(!(km>0))return msg('Enter your current km in the Odometer box at the top first.');
+  const last=S.fuel.length?Math.max(...S.fuel.map(e=>e.km)):null;
+  if(last!=null&&km<=last)return msg('Your odometer ('+fmt(km)+' km) is not higher than your last refuel ('+fmt(last)+' km). Update the Odometer at the top first.');
+  const e={km,l,price:p,date:today()};
+  S.fuel.push(e);if(km>est())setO(km);save();render();
+}
+function delFuel(km){const i=S.fuel.findIndex(e=>e.km===km);if(i>=0){S.fuel.splice(i,1);save();render()}}
+function bk(){const t=$('bt');t.value=JSON.stringify(S);t.select();try{navigator.clipboard.writeText(t.value).catch(()=>{})}catch(e){}$('bm').textContent='Backup ready. Copy it if it was not copied automatically.'}
+function rs(){
+  try{const o=JSON.parse($('bt').value);if(!o.items||!o.fuel||!o.odo)throw 0;S=o;S.log=S.log||[];S.olog=S.olog||[];S.reserve=S.reserve||[];S.trips=S.trips||[];save();render()}
+  catch(e){$('bm').textContent='That does not look like a valid backup.'}
+}
+let T=null,W=null,wl=null,gmsg='';
+function hav(a,b,c,d){const r=x=>x*Math.PI/180,p=r(c-a),q=r(d-b),z=Math.sin(p/2)**2+Math.cos(r(a))*Math.cos(r(c))*Math.sin(q/2)**2;return 12742000*Math.asin(Math.sqrt(z))}
+function tStart(){
+  gmsg='';
+  if(!navigator.geolocation){gmsg='This browser does not support GPS tracking.';render();return}
+  T={dist:0,max:0,moveSec:0,stops:0,stopSec:0,stopStart:null,last:null,t0:Date.now(),spd:0};
+  W=navigator.geolocation.watchPosition(onPos,gErr,{enableHighAccuracy:true,maximumAge:0,timeout:30000});
+  try{navigator.wakeLock&&navigator.wakeLock.request('screen').then(l=>{wl=l}).catch(()=>{})}catch(e){}
+  render();
+}
+function gErr(e){
+  gmsg=e.code===1?'Location access is blocked. Allow location for this page in your browser or phone settings, then try again.':'No GPS signal yet. Keep the phone where it can see the sky.';
+  if(e.code===1)tStop();else if(tab==='t')render();
+}
+function onPos(p){
+  if(!T)return;
+  const c=p.coords;if(c.accuracy>50)return;
+  const t=p.timestamp,L=T.last;gmsg='';
+  if(L){
+    const dt=(t-L.t)/1000,d=hav(L.lat,L.lon,c.latitude,c.longitude);
+    if(dt>0){
+      const hasS=c.speed!=null&&!isNaN(c.speed),v=hasS?c.speed*3.6:d/dt*3.6;
+      if(v<(hasS?3:6)){T.spd=0;if(T.stopStart==null)T.stopStart=t}
+      else{
+        if(T.stopStart!=null){const s=(t-T.stopStart)/1000;if(s>=20){T.stops++;T.stopSec+=s}T.stopStart=null}
+        if(v<200){T.spd=v;T.dist+=d;T.moveSec+=dt;if(v>T.max)T.max=v}
+      }
+    }
+  }
+  T.last={lat:c.latitude,lon:c.longitude,t};
+  if(tab==='t')render();
+}
+function tStop(){
+  if(W!=null&&navigator.geolocation)navigator.geolocation.clearWatch(W);W=null;
+  if(wl){wl.release().catch(()=>{});wl=null}
+  if(T){
+    const now=Date.now();
+    if(T.stopStart!=null){const s=(now-T.stopStart)/1000;if(s>=20){T.stops++;T.stopSec+=s}}
+    const km=T.dist/1000;
+    if(km>=0.1){
+      S.trips.unshift({date:today(),km:+km.toFixed(1),max:Math.round(T.max),avg:T.moveSec>0?+(km/(T.moveSec/3600)).toFixed(0):0,stops:T.stops,stopMin:Math.round(T.stopSec/60),dur:Math.round((now-T.t0)/60000)});
+      S.trips=S.trips.slice(0,20);
+      setO(Math.round((S.odo.km+km)*10)/10);
+    }
+  }
+  T=null;save();render();
+}
+function trip(){
+  const on=!!T,km=on?T.dist/1000:0,mv=on&&T.moveSec>0?km/(T.moveSec/3600):0;
+  const b=(l,v,u)=>`<div class="stat"><div class="sub">${l}</div><div class="big">${v}</div><div class="sub">${u}</div></div>`;
+  let h=`<div class="card"><b>Ride tracker (GPS)</b><div class="sub">Tap Start before you ride. Keep this page open and the screen on (a phone mount helps). When you stop, the distance is added to your odometer. You can correct the odometer anytime in the Service tab.</div><button style="width:100%;margin-top:12px;${on?'background:var(--er)':''}" onclick="${on?'tStop()':'tStart()'}">${on?'■ Stop trip':'▶ Start trip'}</button><div class="sub" style="color:var(--er)">${esc(gmsg)}</div></div>`;
+  if(on)h+=`<div class="card"><div class="row">${b('Distance',km.toFixed(2),'km')}${b('Speed',Math.round(T.spd),'km/h')}${b('Top speed',Math.round(T.max),'km/h')}</div><div class="row" style="margin-top:14px">${b('Avg riding',Math.round(mv),'km/h')}${b('Stops',T.stops,Math.round(T.stopSec/60)+' min stopped')}</div>${T.last?'':'<div class="sub">Waiting for GPS signal…</div>'}</div>`;
+  if(S.trips.length){
+    h+=`<div class="card"><b>Recent trips</b>`;
+    for(const t of S.trips.slice(0,10))h+=`<div class="li"><div>${esc(t.date)} · ${t.km} km<div class="sub">${t.dur} min · avg ${t.avg} · top ${t.max} km/h · ${t.stops} stops (${t.stopMin} min)</div></div></div>`;
+    h+=`</div>`;
+  }
+  return h;
+}
+
+const mapCard=()=>`<details class="card"><summary><b>📍 No odometer? Add distance from a map</b></summary>
+  <div class="sub" style="margin-top:8px">Enter where you rode from and to. Google Maps shows the road distance. Type that number here and it is added to your km.</div>
+  <label>Start (leave empty to use where you are now)</label><input id="ms" placeholder="e.g. Home" oninput="mapUp()">
+  <label>End</label><input id="me" placeholder="e.g. Office" oninput="mapUp()">
+  <a id="ml" href="https://www.google.com/maps/dir/?api=1&travelmode=driving" target="_blank" rel="noopener" style="display:block;text-align:center;margin-top:12px;padding:11px;border-radius:10px;background:var(--tr);color:var(--tx);font-weight:600;text-decoration:none">🗺️ Open route in Google Maps</a>
+  <label>Distance Google Maps shows (km)</label><input id="md" class="meter meter-white" type="number" inputmode="decimal" placeholder="e.g. 18.5">
+  <label style="display:flex;align-items:center;gap:10px;color:var(--tx);font-size:15px"><input id="mr" type="checkbox" style="width:22px;height:22px;padding:0"> Round trip (count it twice)</label>
+  <button style="width:100%;margin-top:12px" onclick="addDist()">Add to my km</button><div class="sub" id="mm" style="color:var(--er)"></div><div class="sub">If Maps shows miles, multiply by 1.6.</div></details>`;
+function mapUp(){
+  const a=$('ms').value.trim(),b=$('me').value.trim();
+  $('ml').href='https://www.google.com/maps/dir/?api=1&travelmode=driving'+(a?'&origin='+encodeURIComponent(a):'')+(b?'&destination='+encodeURIComponent(b):'');
+}
+function addDist(){
+  let d=+$('md').value;
+  if(!(d>0)){$('mm').textContent='Type the distance Google Maps shows, in km.';return}
+  if($('mr').checked)d*=2;
+  setO(Math.round((S.odo.km+d)*10)/10);save();render();toast('Added '+Math.round(d*10)/10+' km to your odometer.');
+}
+setInterval(()=>{let ch=0;S.items.forEach(x=>{if(x.undo&&Date.now()-x.undo.t>=UNDO_MS){delete x.undo;ch=1}});if(ch){save();if(tab==='s')render()}},20000);
+async function exportReport(){
+  const em=$('em');em.textContent='Preparing…';
+  try{
+    if(typeof XLSX==='undefined'){em.textContent='Excel library failed to load. Check your connection and try again.';return}
+    const dl=await claude.use('downloads');
+    if(!dl){em.textContent='Downloads are not available in this view.';return}
+    const months={};
+    S.fuel.forEach(e=>{const m=e.date.slice(0,7);(months[m]=months[m]||[]).push({date:e.date,type:'Fuel',item:e.l+' L'+(e.rk!=null?' (reserve)':''),km:e.km,cost:e.price||0})});
+    S.log.forEach(e=>{const m=e.date.slice(0,7);(months[m]=months[m]||[]).push({date:e.date,type:'Service',item:e.name,km:e.km,cost:e.price||0})});
+    const keys=Object.keys(months).sort();
+    const keep=keys.slice(-5);
+    if(!keep.length){em.textContent='No fuel or service entries yet to export.';return}
+    const wb=XLSX.utils.book_new(),summary=[['Month','Fuel cost','Service cost','Total']];
+    for(const k of keep){
+      const rows=months[k].sort((a,b)=>a.date.localeCompare(b.date));
+      const data=[['Date','Type','Item','Km','Cost']];
+      rows.forEach(r=>data.push([r.date,r.type,r.item,r.km,r.cost]));
+      const fc=rows.filter(r=>r.type==='Fuel').reduce((s,r)=>s+r.cost,0),sc=rows.filter(r=>r.type==='Service').reduce((s,r)=>s+r.cost,0);
+      data.push(['','','','Total',fc+sc]);
+      const ws=XLSX.utils.aoa_to_sheet(data);
+      XLSX.utils.book_append_sheet(wb,ws,k);
+      summary.push([k,fc,sc,fc+sc]);
+    }
+    const sws=XLSX.utils.aoa_to_sheet(summary);
+    XLSX.utils.book_append_sheet(wb,sws,'Summary');
+    wb.SheetNames=['Summary',...wb.SheetNames.filter(n=>n!=='Summary')];
+    const out=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+    const name=(S.name||'Bike').trim().replace(/[^a-z0-9]+/gi,'_')||'Bike';
+    const res=await dl.save({filename:name+'_expenses.xlsx',data:new Blob([out],{type:'application/octet-stream'})});
+    em.textContent=res.status==='saved'?'Saved. Only the latest '+keep.length+' month(s) are included.':'Sent.';
+  }catch(err){
+    em.textContent=(err&&err.code==='declined')?'':'Could not export ('+((err&&err.code)||'error')+').';
+  }
+}
+load();applyTheme();
+if(location.hash==='#trip')tab='t';else if(location.hash==='#service')tab='s';else tab='f';
+render();
+</script>
+<script>if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) { window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {})); }</script>
+</body></html>
